@@ -52,8 +52,6 @@ class VmFile {
     pthread_rwlock_rdlock(&rwlock_);
   }
 
-  uint64_t size() { return filesize_; }
-
   ErrCode Unlock() {
     pthread_rwlock_unlock(&rwlock_);
   }
@@ -73,6 +71,14 @@ class VmFile {
   ErrCode Resize(uint64_t size);
 
   ErrCode Flush();
+
+  uint64_t size() { return filesize_; }
+
+  string& filename() { return filename_; }
+
+  void* buffer() { return buffer_; }
+
+  string ToString();
 };
 
 }

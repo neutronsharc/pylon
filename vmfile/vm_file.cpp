@@ -23,7 +23,7 @@ namespace hcdnbd {
 VmFile::~VmFile() {
   Close();
   pthread_rwlock_destroy(&rwlock_);
-  LOG(INFO) << "release file " << filename_;
+  LOG(INFO) << "release vmfile " << filename_;
 }
 
 ErrCode VmFile::Init(uint64_t size) {
@@ -148,6 +148,17 @@ ErrCode VmFile::Write(void *buf, uint64_t size, uint64_t offset) {
 
   Unlock();
   return kOk;
+}
+
+string VmFile::ToString() {
+  string s;
+  char buf[100];
+  sprintf(buf, "%p", buffer());
+  s.append("filename: ").append(filename());
+  s.append(", size: " ).append(to_string(size()));
+  s.append(", buf: " ).append(buf);
+
+  return s;
 }
 
 }

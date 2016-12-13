@@ -33,17 +33,41 @@ void FileTest(VmFile* file) {
 
   int bufsize = 4096;
   char buf[bufsize];
+  char readbuf[bufsize];
 
   uint64_t filesize = file->size();
   uint64_t blks = filesize / blksize;
 
-  for (uint64_t i = 0; i < blks; i++) {
-    memset(buf, i + 2, bufsize);
-    if (file->Write(buf, bufsize, i * blksize) != kOk) {
-      LOG(ERROR) << "failed to write file at offset " << i * blksize;
+  LOG(INFO) << "init file";
+  int i = 0;
+  for (uint64_t offset = 0; offset < filesize; offset += blksize, i++) {
+    memset(buf, i, bufsize);
+    if (file->Write(buf, bufsize, offset) != kOk) {
+      LOG(ERROR) << "failed to write file at offset " << offset;
     }
   }
+  LOG(INFO) << "file inited: " << file->ToString();
 
+  uint64_t newsize = filesize * 2;
+  LOG(INFO) << "will resize file " << file->filename() << " to " << newsize;
+  if (file->Resize(newsize) != kOk) {
+    LOG(ERROR) << "failed to extend file " << file->filename();
+  }
+
+  // will check the beginning content.
+  LOG(INFO) << "check if file content remains intact after resizing";
+  i = 0;
+  for (uint64_t offset = 0; offset < filesize; offset += blksize, i++) {
+    if (file->Read(readbuf, bufsize, offset) != kOk) {
+      LOG(ERROR) << "failed to write file at offset " << offset;
+    } else {
+      memset(buf, i, bufsize);
+      if (memcmp(buf, readbuf, bufsize) != 0) {
+        LOG(ERROR) << "file content mismatch at pos " << offset;
+      }
+    }
+  }
+  LOG(INFO) << "file test done, file= " << file->ToString();
 }
 
 int main(int argc, char** argv) {
